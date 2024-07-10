@@ -543,6 +543,13 @@ func (s *Storage) getPrivateClaimsFromScopes(ctx context.Context, userID, client
 		}
 	}
 	if u := s.userStore.GetUserByID(userID); u != nil {
+		if u.FirstName != "" && u.LastName != "" {
+			claims = appendClaim(claims, "firstName", u.FirstName)
+			claims = appendClaim(claims, "lastName", u.LastName)
+			claims = appendClaim(claims, "name", u.FirstName+" "+u.LastName)
+		} else {
+			claims = appendClaim(claims, "name", u.Username)
+		}
 		claims = appendClaim(claims, "email", u.Email)
 		claims = appendClaim(claims, "groups", "admin,Root:operator")
 	}
